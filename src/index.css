@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+
+    /* ── Nexora data-visualisation tokens ────────────────────────────────
+       Categorical order validated with the dataviz palette validator:
+       worst adjacent CVD ΔE 9.2 (target ≥8), normal-vision ΔE 15.6 (floor ≥15).
+       Slots 1–4 additionally clear --pairs all, so any chart where any two
+       marks can touch (radar overlay, scatter) is capped at four series.
+       Slots 4, 6, 7 sit below 3:1 on white → they always ship direct labels
+       and a table view (the relief rule). ───────────────────────────────── */
+    --series-1: #2a78d6;  /* electric blue */
+    --series-2: #4a3aa7;  /* violet */
+    --series-3: #eb6834;  /* orange */
+    --series-4: #1baf7a;  /* aqua */
+    --series-5: #008300;  /* green */
+    --series-6: #e87ba4;  /* magenta */
+    --series-7: #eda100;  /* yellow */
+    --series-8: #e34948;  /* red */
+
+    /* Ordinal blue — funnel stages. Monotone L, adjacent ΔL ≥ 0.06,
+       light end 2.48:1 on white. Validated with --ordinal. */
+    --ordinal-1: #73a7ec;
+    --ordinal-2: #5090e4;
+    --ordinal-3: #2e79d8;
+    --ordinal-4: #0763c4;
+    --ordinal-5: #004ea9;
+    --ordinal-6: #003c88;
+    --ordinal-7: #002b65;
+
+    /* Sequential blue — heat maps (continuous magnitude). */
+    --seq-100: #eff5fe; --seq-200: #cde2fb; --seq-300: #9ec5f4;
+    --seq-400: #6da7ec; --seq-500: #3987e5; --seq-600: #256abf;
+    --seq-700: #184f95; --seq-800: #0d366b;
+
+    /* Diverging — two poles + neutral gray midpoint (never a hue at the middle). */
+    --div-neg-2: #d03b3b; --div-neg-1: #ec9a9a;
+    --div-mid: #eef0f4;
+    --div-pos-1: #86b6ef; --div-pos-2: #2a78d6;
+
+    --surface-1: #ffffff;
+    --grid: #E8EDF6;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+  }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    @apply bg-surface-page text-ink font-sans antialiased;
+    font-feature-settings: 'cv02','cv03','cv04','ss01','tnum' 0;
+    margin: 0;
+  }
+
+  /* Tabular figures wherever numbers are compared down a column. */
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  *:focus-visible {
+    outline: 2px solid #2a78d6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection { background: #DBE9FD; color: #0A1330; }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-card border border-surface-line rounded-2xl shadow-card;
+  }
+  .card-pad { @apply p-5; }
+
+  /* Glass is used sparingly — only over the navy brand field, where the
+     translucency actually reads as depth rather than as muddy contrast. */
+  .glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .glass-dark {
+    background: rgba(10, 19, 48, 0.72);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .label { @apply text-2xs font-semibold uppercase tracking-wider text-ink-muted; }
+  .hairline { @apply border-surface-line; }
+
+  .scroll-thin { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
+  .scroll-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scroll-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* Branded PDF / print export — Analysis and Assessment summaries. */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  .card { box-shadow: none !important; border-color: #D8DFEC !important; break-inside: avoid; }
+  .print-page { break-after: page; }
+  @page { margin: 14mm; size: A4; }
+}
