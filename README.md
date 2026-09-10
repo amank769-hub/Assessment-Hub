@@ -9,13 +9,22 @@ legend, weighted competency scoring, a 1–3 cultural fitment scale, per-level i
 Overall Summary that averages every level and tracks the ageing between them. What the spreadsheet
 hard-codes as five fixed tabs, this platform generates from each requisition's own workflow.
 
-## Running it
+## Opening it
+
+**Just want to look at it?** Open **`Nexora-AI.html`** in the project root. One self-contained file —
+no install, no server, works offline. Double-click it.
+
+**Want to edit it?**
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # typecheck + production bundle
+npm run dev               # http://localhost:5173
+npm run build             # typecheck + production bundle into dist/
+npm run build:standalone  # regenerate Nexora-AI.html
 ```
+
+> `index.html` in the root is the Vite entry point, not a page — it points at TypeScript source that a
+> browser cannot run on its own. Opening it directly tells you so rather than showing a blank screen.
 
 No backend. All state lives in a React reducer, so every interaction is real: decisions mutate the
 pipeline, sign-offs recompute scores, and the audit trail grows as you use it.

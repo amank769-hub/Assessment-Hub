@@ -11,7 +11,30 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230B1B3F'/%3E%3Cpath d='M9 23V9h3.4l7.2 9.1V9H23v14h-3.4l-7.2-9.1V23H9z' fill='%232A78D6'/%3E%3C/svg%3E" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Only visible if this file is opened directly instead of served.
+           Vite replaces it as soon as the app mounts. -->
+      <div style="font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:34rem;margin:12vh auto;padding:0 1.5rem;color:#0F172A">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem">
+          <span style="display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#2A78D6,#4A3AA7);color:#fff;font-weight:800">N</span>
+          <strong style="font-size:1.05rem">Nexora AI</strong>
+        </div>
+        <h1 style="font-size:1.35rem;margin:0 0 .6rem">This file needs a dev server</h1>
+        <p style="margin:0 0 1rem;color:#475569">
+          It points at TypeScript source, which a browser cannot run on its own. Two ways to see the app:
+        </p>
+        <p style="margin:0 0 .75rem;padding:.9rem 1rem;background:#EFF5FE;border:1px solid #DBE9FD;border-radius:12px">
+          <strong>Just want to look at it?</strong><br />
+          Open <code style="background:#fff;padding:.15rem .4rem;border-radius:6px;border:1px solid #DBE9FD">Nexora-AI.html</code>
+          in the project root. One self-contained file, no install, works offline.
+        </p>
+        <p style="margin:0;padding:.9rem 1rem;background:#F5F7FB;border:1px solid #E4E9F2;border-radius:12px">
+          <strong>Want to edit it?</strong><br />
+          <code style="background:#fff;padding:.15rem .4rem;border-radius:6px;border:1px solid #E4E9F2">npm install &amp;&amp; npm run dev</code>
+          then open <code style="background:#fff;padding:.15rem .4rem;border-radius:6px;border:1px solid #E4E9F2">http://localhost:5173</code>
+        </p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
