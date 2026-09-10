@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { Fragment, useMemo, useRef, useState } from 'react'
 import {
   BadgeCheck, Check, ChevronDown, ChevronRight, FileText, Layers, Loader2,
   Plus, Save, Scale, Sparkles, Trash2, Upload, Wand2, X,
@@ -272,8 +272,8 @@ export const CompetencyMapping = ({ req }: { req: Requisition }) => {
                 const open = expanded === c.id
                 const stage = req.workflow.find(s => s.key === c.assessAtStage)
                 return (
-                  <>
-                    <tr key={c.id} className={cx('transition-colors', open ? 'bg-electric-50/40' : 'hover:bg-surface-page/60')}>
+                  <Fragment key={c.id}>
+                    <tr className={cx('transition-colors', open ? 'bg-electric-50/40' : 'hover:bg-surface-page/60')}>
                       <Td>
                         <button onClick={() => setExpanded(open ? null : c.id)} className="text-ink-faint hover:text-ink" aria-label="Toggle detail">
                           {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -344,7 +344,7 @@ export const CompetencyMapping = ({ req }: { req: Requisition }) => {
                     </tr>
 
                     {open && (
-                      <tr key={`${c.id}-detail`}>
+                      <tr>
                         <td colSpan={10} className="border-b border-surface-line bg-electric-50/25 px-5 py-5">
                           <div className="grid gap-5 lg:grid-cols-2 animate-fade-up">
                             <div className="space-y-4">
@@ -401,7 +401,7 @@ export const CompetencyMapping = ({ req }: { req: Requisition }) => {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 )
               })}
             </tbody>

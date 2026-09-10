@@ -475,6 +475,18 @@ export const CompareBars = ({
 /** Talk-time split. Two segments with a 2px surface gap and both directly labelled. */
 export const TalkRatioBar = ({ interviewer, candidate, className }: { interviewer: number; candidate: number; className?: string }) => {
   const healthy = candidate >= 60 && candidate <= 80
+
+  // Nothing said yet is not the same as an unbalanced conversation.
+  if (interviewer + candidate === 0) {
+    return (
+      <div className={cx('min-w-0', className)}>
+        <div className="h-7 w-full rounded-lg border border-dashed border-surface-line bg-surface-sunken/40 grid place-items-center">
+          <span className="text-2xs text-ink-faint">No speech captured yet</span>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={cx('min-w-0', className)}>
       <div className="flex h-7 w-full overflow-hidden rounded-lg gap-0.5">
