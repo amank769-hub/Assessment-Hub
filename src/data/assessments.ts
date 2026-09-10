@@ -96,15 +96,25 @@ const OVERALL: Record<string, string> = {
   'CAN-4108:s3_l3': 'Exactly the independence this role needs. I would be comfortable with him as the person who says no to me.',
 }
 
-/** Derives a per-competency rating for a stage from the interview summary, or from the stage score. */
+/**
+ * A per-competency rating for a stage. Where the interview summary recorded one,
+ * that wins. Otherwise it is derived from the stage average shifted by how
+ * strongly this candidate actually evidenced that competency at screening —
+ * which is roughly what an interviewer does, and stops every row on a scorecard
+ * collapsing to the same number.
+ */
 const ratingFor = (candidateId: string, stageKey: string, competencyId: string, stageScore: number, isFocus: boolean): number => {
   const iv = INTERVIEWS.find(i => i.candidateId === candidateId && i.stageKey === stageKey)
   const row = iv?.aiSummary?.evidenceByCompetency.find(e => e.competencyId === competencyId)
   if (row) return row.suggestedRating
-  // Non-focus rows are rated more conservatively — the interviewer saw less of them.
-  const base = isFocus ? stageScore : stageScore - 0.4
-  const jitter = ((competencyId.charCodeAt(competencyId.length - 1) % 3) - 1) * 0.35
-  return Math.max(1, Math.min(6, Math.round(base + jitter)))
+
+  const cand = CANDIDATES.find(c => c.id === candidateId)
+  const match = cand?.screening?.skillMatches.find(m => m.competencyId === competencyId)?.match ?? 75
+  // A 75% match is neutral; every 12 points either side moves the rating by one.
+  const shift = (match - 75) / 12
+  // Rows the stage was not designed to probe are rated more conservatively.
+  const base = stageScore + shift - (isFocus ? 0 : 0.4)
+  return Math.max(1, Math.min(6, Math.round(base)))
 }
 
 const evidenceFor = (candidateId: string, stageKey: string, competencyId: string): string[] => {
@@ -204,6 +214,27 @@ if (kavyaL2) {
   kavyaL2.signOff = { signed: false }
   kavyaL2.submittedAt = undefined
   kavyaL2.dueAt = rel(1, 18)
+}
+
+/**
+ * A stage carries a score only once its scorecard is signed. Nothing counts
+ * until a person signs it, so an unsigned level shows as still in progress —
+ * which is exactly Kavya Nair's L2, sitting on Arjun Mehta's desk.
+ */
+for (const cand of CANDIDATES) {
+  for (const prog of cand.stageProgress) {
+    const a = ASSESSMENTS.find(x => x.candidateId === cand.id && x.stageKey === prog.stageKey)
+    if (!a) continue
+    if (a.status === 'submitted') {
+      prog.score = Number(a.weightedAverage.toFixed(2))
+      prog.decision = a.finalDecision ?? prog.decision
+    } else if (prog.status === 'completed') {
+      prog.status = 'in_progress'
+      prog.score = undefined
+      prog.decision = undefined
+      prog.completedAt = undefined
+    }
+  }
 }
 
 export const assessmentById = (id: string) => ASSESSMENTS.find(a => a.id === id)

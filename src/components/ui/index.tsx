@@ -99,7 +99,7 @@ const RAG_META: Record<RagStatus, { label: string; Icon: typeof Check }> = {
 export const RagPill = ({ status, label, className }: { status: RagStatus; label?: string; className?: string }) => {
   const { label: def, Icon } = RAG_META[status]
   return (
-    <span className={cx('inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-2xs font-semibold border', className)}
+    <span className={cx('inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-2xs font-semibold border', className)}
       style={{ color: RAG[status], borderColor: `${RAG[status]}44`, background: `${RAG[status]}0F` }}>
       <Icon className="h-3 w-3" strokeWidth={2.5} />
       {label ?? def}

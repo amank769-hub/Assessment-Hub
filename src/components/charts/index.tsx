@@ -385,11 +385,13 @@ export const StageAgeingTable = ({
                 <div className="absolute inset-y-0 left-0 rounded-lg transition-all duration-700"
                   style={{ width: `${Math.max(pct, 2)}%`, background: over ? '#EC835A' : '#2a78d6', opacity: 0.9 }} />
                 <div className="absolute inset-y-0 w-px bg-navy-800" style={{ left: `${slaPct}%` }} title={`SLA ${d.slaDays}d`} />
-                <span className="absolute inset-y-0 right-2 grid place-items-center tnum text-2xs font-semibold text-ink-soft">
-                  {d.medianDays}d {over && <span className="text-rag-serious">· {(d.medianDays - d.slaDays).toFixed(1)}d over</span>}
+                <span className="absolute inset-y-0 right-2 grid place-items-center whitespace-nowrap tnum text-2xs font-semibold text-ink-soft">
+                  {d.medianDays.toFixed(1)}d
                 </span>
               </div>
-              <span className="w-14 shrink-0 text-right tnum text-2xs text-ink-muted">max {d.oldestDays}d</span>
+              <span className={cx('w-24 shrink-0 whitespace-nowrap text-right tnum text-2xs', over ? 'font-semibold text-rag-serious' : 'text-ink-muted')}>
+                {over ? `+${(d.medianDays - d.slaDays).toFixed(1)}d over SLA` : `max ${d.oldestDays}d`}
+              </span>
             </div>
           )
         })}
