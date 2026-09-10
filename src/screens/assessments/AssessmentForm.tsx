@@ -317,9 +317,13 @@ export default function AssessmentForm() {
                   <Td colSpan={2} className="font-semibold text-ink">Weighted average</Td>
                   <Td align="center" className="font-semibold text-ink">100%</Td>
                   <Td align="center">
-                    <span className="tnum text-xl font-bold" style={{ color: asm.weightedAverage >= 5 ? RAG.good : asm.weightedAverage >= 4 ? seriesAt(0) : RAG.warning }}>
-                      {asm.weightedAverage.toFixed(2)}<span className="text-2xs font-normal text-ink-faint">/6</span>
-                    </span>
+                    {rated === 0 ? (
+                      <span className="text-2xs text-ink-faint">Nothing rated yet</span>
+                    ) : (
+                      <span className="tnum text-xl font-bold" style={{ color: asm.weightedAverage >= 5 ? RAG.good : asm.weightedAverage >= 4 ? seriesAt(0) : RAG.warning }}>
+                        {asm.weightedAverage.toFixed(2)}<span className="text-2xs font-normal text-ink-faint">/6</span>
+                      </span>
+                    )}
                   </Td>
                   <Td colSpan={2} className="text-2xs leading-snug text-ink-muted">
                     Σ(rating × weight) ÷ Σ(weight) over rated rows only
@@ -375,7 +379,8 @@ export default function AssessmentForm() {
           <div className="space-y-5">
             <Card>
               <CardHeader title="Handover to the next interviewer"
-                subtitle="What the next level should spend its time on — the single most useful field on the sheet" />
+                subtitle="What the next level should spend its time on — the single most useful field on the sheet"
+                action={!locked && asm.inputsForNextInterviewer ? <AiChip label="AI draft" /> : undefined} />
               <div className="card-pad pt-4">
                 <Textarea rows={5} value={asm.inputsForNextInterviewer} disabled={!canEdit}
                   onChange={e => set({ inputsForNextInterviewer: e.target.value })}
@@ -384,7 +389,8 @@ export default function AssessmentForm() {
             </Card>
 
             <Card>
-              <CardHeader title="Overall comments" />
+              <CardHeader title="Overall comments"
+                action={!locked && asm.overallComments ? <AiChip label="AI draft" /> : undefined} />
               <div className="card-pad pt-4 space-y-3">
                 <Textarea rows={4} value={asm.overallComments} disabled={!canEdit}
                   onChange={e => set({ overallComments: e.target.value })} className="text-[13px]"

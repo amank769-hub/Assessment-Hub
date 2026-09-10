@@ -446,7 +446,7 @@ const DeepDiveView = () => {
               <TrendLines
                 title="Competency score trend across levels"
                 subtitle="How the read on each competency changed as different panels tested it"
-                data={trend} xKey="level"
+                data={trend} xKey="level" yDomain={[0, 6]}
                 keys={tracked.map(t => ({ key: t.competencyId, label: t.name }))}
                 height={250} />
             </Card>

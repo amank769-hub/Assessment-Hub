@@ -17,11 +17,18 @@ import { Logo } from '@/components/layout/AppShell'
 
 type Section = 'status' | 'role' | 'messages' | 'documents' | 'apply'
 
+const SECTIONS: Section[] = ['status', 'role', 'messages', 'documents', 'apply']
+
 export default function CandidatePortal() {
   const { section } = useParams<{ section?: string }>()
   const { state } = useApp()
-  const [tab, setTab] = useState<Section>((section as Section) ?? 'status')
+  const nav = useNavigate()
   const isPreview = state.role !== 'candidate'
+
+  // The tab lives in the URL so a link to a specific section actually lands
+  // there — the two portal routes share a component, so local state would not.
+  const tab: Section = SECTIONS.includes(section as Section) ? (section as Section) : 'status'
+  const setTab = (s: Section) => nav(s === 'status' ? '/portal' : `/portal/${s}`)
 
   const cand = state.candidates.find(c => c.id === state.portalCandidateId)!
   const req = state.requisitions.find(r => r.id === cand.requisitionId)!

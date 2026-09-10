@@ -197,24 +197,30 @@ export const ASSESSMENTS: Assessment[] = buildAssessments()
 
 /* ── Two scorecards deliberately left in a state that needs a human ──── */
 
-// James Okonkwo's L1 feedback is late — this drives the "overdue feedback" signals.
-const jamesL1 = ASSESSMENTS.find(a => a.id === 'ASM-4106-s2_l1')
-if (jamesL1) {
-  jamesL1.status = 'overdue'
-  jamesL1.signOff = { signed: false }
-  jamesL1.submittedAt = undefined
-  jamesL1.dueAt = rel(-4, 18)
-  jamesL1.scores = jamesL1.scores.map(s => ({ ...s, interviewerConfirmed: false }))
+/**
+ * Returns a scorecard to a genuine AI draft: the suggestion is intact and
+ * visible, but no rating, prose or confirmation has been contributed by a
+ * person yet. This is what an interviewer actually opens.
+ */
+const asDraft = (id: string, status: 'in_review' | 'overdue', dueAt: string) => {
+  const a = ASSESSMENTS.find(x => x.id === id)
+  if (!a) return
+  a.status = status
+  a.signOff = { signed: false }
+  a.submittedAt = undefined
+  a.dueAt = dueAt
+  a.finalDecision = null
+  a.culturalFitment = null
+  a.culturalRationale = ''
+  a.scores = a.scores.map(s => ({ ...s, rating: null, positives: '', negatives: '', interviewerConfirmed: false }))
+  a.weightedAverage = 0
 }
 
-// Kavya's L2 is drafted by AI and waiting on Arjun's review and sign-off.
-const kavyaL2 = ASSESSMENTS.find(a => a.id === 'ASM-4103-s_l2')
-if (kavyaL2) {
-  kavyaL2.status = 'in_review'
-  kavyaL2.signOff = { signed: false }
-  kavyaL2.submittedAt = undefined
-  kavyaL2.dueAt = rel(1, 18)
-}
+// James Okonkwo's L1 feedback is four days past SLA and his L2 runs today.
+asDraft('ASM-4106-s2_l1', 'overdue', rel(-4, 18))
+
+// Kavya Nair's L2 is drafted and sitting on Arjun Mehta's desk for review.
+asDraft('ASM-4103-s_l2', 'in_review', rel(1, 18))
 
 /**
  * A stage carries a score only once its scorecard is signed. Nothing counts

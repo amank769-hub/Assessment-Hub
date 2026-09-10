@@ -233,12 +233,14 @@ export const StackedBars = ({
    One axis only — measures on different scales get their own chart. ═══════ */
 
 export const TrendLines = ({
-  data, keys, xKey, title, subtitle, height = 230, className, unit = '', area = false,
+  data, keys, xKey, title, subtitle, height = 230, className, unit = '', area = false, yDomain,
 }: {
   data: Record<string, string | number>[]
   keys: { key: string; label: string }[]
   xKey: string
   title?: React.ReactNode; subtitle?: React.ReactNode; height?: number; className?: string; unit?: string; area?: boolean
+  /** Pin the scale where the measure has a fixed range — a 1–6 rating should not autoscale to 8. */
+  yDomain?: [number, number]
 }) => {
   const legend = keys.map((k, i) => ({ label: k.label, color: seriesAt(i) }))
   const table: TableView = {
@@ -260,7 +262,7 @@ export const TrendLines = ({
           </defs>
           <CartesianGrid stroke={GRID} vertical={false} />
           <XAxis dataKey={xKey} {...axis} />
-          <YAxis {...axis} />
+          <YAxis {...axis} {...(yDomain ? { domain: yDomain, allowDecimals: false } : {})} />
           <Tooltip cursor={{ stroke: '#94A3B8', strokeDasharray: '3 3' }} content={({ active, payload, label }) => {
             if (!active || !payload?.length) return null
             return <TipShell title={String(label)} rows={payload.map(p => ({
