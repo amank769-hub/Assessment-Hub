@@ -144,7 +144,9 @@ export const requisitionHealth = (req: Requisition): ReqHealth => {
   const levels = interviewStages(req)
   const furthest = Math.max(0, ...cands.map(c => {
     const idx = levels.findIndex(l => l.key === c.currentStageKey)
-    return c.status === 'Offer Recommended' ? levels.length : idx + 1
+    // The level a candidate is *sitting in* is not yet complete, so `idx`
+    // (not idx + 1) is the number of levels actually behind them.
+    return c.status === 'Offer Recommended' || c.status === 'Hired' ? levels.length : Math.max(0, idx)
   }))
 
   const reasons: string[] = []

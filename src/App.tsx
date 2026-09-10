@@ -1,7 +1,8 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { useApp } from '@/store/AppStore'
 import { ROLE_PERMISSIONS } from '@/data'
+import { Toasts } from '@/components/ui'
 
 import Dashboard from '@/screens/dashboard/Dashboard'
 import RequisitionList from '@/screens/requisitions/RequisitionList'
@@ -25,9 +26,24 @@ const Guarded = ({ screen, children }: { screen: string; children: JSX.Element }
 }
 
 export default function App() {
-  const { state } = useApp()
+  const { state, dispatch } = useApp()
+  const loc = useLocation()
   const home = state.role === 'candidate' ? '/portal'
     : ROLE_PERMISSIONS[state.role].screens.includes('dashboard') ? '/dashboard' : '/analysis'
+
+  // The candidate experience is external-facing — it deliberately renders
+  // outside the recruiter shell, with its own branded chrome.
+  if (loc.pathname.startsWith('/portal')) {
+    return (
+      <>
+        <Routes>
+          <Route path="/portal" element={<CandidatePortal />} />
+          <Route path="/portal/:section" element={<CandidatePortal />} />
+        </Routes>
+        <Toasts toasts={state.toasts} onDismiss={id => dispatch({ type: 'DISMISS_TOAST', id })} />
+      </>
+    )
+  }
 
   return (
     <AppShell>
@@ -44,8 +60,6 @@ export default function App() {
         <Route path="/assessments/:assessmentId" element={<Guarded screen="assessments"><AssessmentForm /></Guarded>} />
         <Route path="/analysis" element={<Guarded screen="analysis"><Analysis /></Guarded>} />
         <Route path="/governance" element={<Guarded screen="governance"><Governance /></Guarded>} />
-        <Route path="/portal" element={<CandidatePortal />} />
-        <Route path="/portal/:section" element={<CandidatePortal />} />
         <Route path="*" element={<Navigate to={home} replace />} />
       </Routes>
     </AppShell>

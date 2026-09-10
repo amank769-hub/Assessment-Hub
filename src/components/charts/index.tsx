@@ -45,18 +45,32 @@ export const FunnelChart = ({
           const step = i === 0 ? null : (d.count / (data[i - 1].count || 1)) * 100
           const color = ORDINAL[Math.min(i, ORDINAL.length - 1)]
           const isHover = hover === i
+          const narrow = pct < 12
           return (
             <div key={d.stage}
               onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
               className="group relative flex items-center gap-3 cursor-default">
               <span className="w-[7.5rem] shrink-0 text-xs font-medium text-ink-soft truncate">{d.stage}</span>
-              <div className="relative flex-1 h-9 rounded-lg bg-surface-sunken/70 overflow-hidden min-w-0">
+              <div className="relative flex-1 h-9 rounded-lg bg-surface-sunken/70 min-w-0">
                 <div
                   className="absolute inset-y-0 left-0 rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2.5"
-                  style={{ width: `${Math.max(pct, 8)}%`, background: color, opacity: isHover ? 1 : 0.94 }}
+                  style={{ width: `${Math.max(pct, 3)}%`, background: color, opacity: isHover ? 1 : 0.94 }}
                 >
-                  <span className="tnum text-[13px] font-bold text-white drop-shadow-sm">{d.count.toLocaleString()}</span>
+                  {/* The two lightest ordinal steps cannot carry white text at 4.5:1,
+                      and a narrow bar has no room for a label at all — so the value
+                      moves outside rather than sitting on an unreadable fill. */}
+                  {!narrow && (
+                    <span className="tnum text-[13px] font-bold" style={{ color: i < 2 ? '#0A1330' : '#FFFFFF' }}>
+                      {d.count.toLocaleString()}
+                    </span>
+                  )}
                 </div>
+                {narrow && (
+                  <span className="absolute inset-y-0 flex items-center tnum text-[13px] font-bold text-ink"
+                    style={{ left: `calc(${Math.max(pct, 3)}% + 8px)` }}>
+                    {d.count.toLocaleString()}
+                  </span>
+                )}
               </div>
               <span className="w-14 shrink-0 text-right tnum text-xs font-semibold"
                 style={{ color: step == null ? AXIS_TEXT : step >= 55 ? '#0CA30C' : step >= 25 ? '#EC835A' : '#D03B3B' }}>
@@ -86,7 +100,14 @@ export const FunnelChart = ({
    Only the first four palette slots validate all-pairs, so past four
    candidates this switches to small multiples rather than inventing hues. ══ */
 
-export interface RadarSeries { id: string; name: string; values: number[] }
+export interface RadarSeries {
+  id: string
+  name: string
+  values: number[]
+  /** A reference boundary (e.g. required proficiency) — drawn as a dashed
+      outline with no fill, so it reads as a threshold rather than a rival series. */
+  reference?: boolean
+}
 
 export const RadarCompare = ({
   axes, series, max = 6, title, subtitle, className, height = 300,
@@ -104,7 +125,7 @@ export const RadarCompare = ({
     rows: axes.map((a, i) => [a, ...series.map(s => Number((s.values[i] ?? 0).toFixed(2)))]),
   }
 
-  const legend = series.map((s, i) => ({ label: s.name, color: seriesAt(i) }))
+  const legend = series.map((s, i) => ({ label: s.name, color: seriesAt(i), note: s.reference ? '(threshold)' : undefined }))
 
   if (!overlay) {
     // Small multiples: one facet per candidate, all in the same slot-1 hue.
@@ -148,7 +169,10 @@ export const RadarCompare = ({
           }} />
           {series.map((s, i) => (
             <Radar key={s.id} name={s.name} dataKey={`s${i}`}
-              stroke={seriesAt(i)} fill={seriesAt(i)} fillOpacity={0.14} strokeWidth={2} />
+              stroke={seriesAt(i)} fill={seriesAt(i)}
+              fillOpacity={s.reference ? 0 : series.length > 2 ? 0.10 : 0.18}
+              strokeWidth={s.reference ? 1.5 : 2}
+              strokeDasharray={s.reference ? '5 4' : undefined} />
           ))}
         </RadarChart>
       </ResponsiveContainer>

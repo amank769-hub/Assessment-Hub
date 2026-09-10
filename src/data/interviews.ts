@@ -1,4 +1,4 @@
-import { rel } from '@/lib/dates'
+import { rel, relHours, relInTz } from '@/lib/dates'
 import type { AiInterviewSummary, Interview, TranscriptLine } from './types'
 import { REQUISITIONS } from './requisitions'
 
@@ -116,7 +116,7 @@ const T_CARLOS_L3: TranscriptLine[] = [
 export const INTERVIEWS: Interview[] = [
   {
     id: 'INT-001', requisitionId: 'REQ-2049', candidateId: 'CAN-4101', stageKey: 's_l1',
-    scheduledAt: rel(-32, 15, 30), timezone: 'Asia/Kolkata', durationMins: 60,
+    scheduledAt: relInTz(-32, 15, 30, 'Asia/Kolkata'), timezone: 'Asia/Kolkata', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_murugan', 'u_soundar'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-001', recordingAvailable: true,
     transcript: T_ANANYA_L1, feedbackStatus: 'submitted', chat: [],
@@ -146,7 +146,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-002', requisitionId: 'REQ-2049', candidateId: 'CAN-4101', stageKey: 's_l2',
-    scheduledAt: rel(-21, 11, 0), timezone: 'Asia/Kolkata', durationMins: 60,
+    scheduledAt: relInTz(-21, 11, 0, 'Asia/Kolkata'), timezone: 'Asia/Kolkata', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_arjun'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-002', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -165,7 +165,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-003', requisitionId: 'REQ-2049', candidateId: 'CAN-4101', stageKey: 's_l3',
-    scheduledAt: rel(-9, 10, 0), timezone: 'Asia/Kolkata', durationMins: 45,
+    scheduledAt: relInTz(-9, 10, 0, 'Asia/Kolkata'), timezone: 'Asia/Kolkata', durationMins: 45,
     mode: 'Video Conference', interviewerIds: ['u_ravi'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-003', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -183,14 +183,14 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-004', requisitionId: 'REQ-2049', candidateId: 'CAN-4101', stageKey: 's_l4',
-    scheduledAt: rel(0, 15, 0), timezone: 'Asia/Kolkata', durationMins: 45,
+    scheduledAt: relHours(4), timezone: 'Asia/Kolkata', durationMins: 45,
     mode: 'Video Conference', interviewerIds: ['u_tom'], status: 'Scheduled',
     meetingLink: 'https://meet.nexora.com/int-004', recordingAvailable: false,
     transcript: [], feedbackStatus: 'not_started', chat: [],
   },
   {
     id: 'INT-005', requisitionId: 'REQ-2049', candidateId: 'CAN-4102', stageKey: 's_l1',
-    scheduledAt: rel(-24, 14, 0), timezone: 'Asia/Kolkata', durationMins: 60,
+    scheduledAt: relInTz(-24, 14, 0, 'Asia/Kolkata'), timezone: 'Asia/Kolkata', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_murugan', 'u_soundar'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-005', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -208,14 +208,14 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-006', requisitionId: 'REQ-2049', candidateId: 'CAN-4102', stageKey: 's_l2',
-    scheduledAt: rel(0, 11, 0), timezone: 'Asia/Kolkata', durationMins: 60,
+    scheduledAt: relHours(1), timezone: 'Asia/Kolkata', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_arjun'], status: 'Scheduled',
     meetingLink: 'https://meet.nexora.com/int-006', recordingAvailable: false,
     transcript: T_ROHIT_L2, feedbackStatus: 'not_started', chat: [],
   },
   {
     id: 'INT-007', requisitionId: 'REQ-2049', candidateId: 'CAN-4103', stageKey: 's_l1',
-    scheduledAt: rel(-22, 16, 0), timezone: 'Asia/Kolkata', durationMins: 60,
+    scheduledAt: relInTz(-22, 16, 0, 'Asia/Kolkata'), timezone: 'Asia/Kolkata', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_murugan'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-007', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -233,7 +233,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-008', requisitionId: 'REQ-2049', candidateId: 'CAN-4103', stageKey: 's_l2',
-    scheduledAt: rel(-13, 15, 0), timezone: 'Asia/Kolkata', durationMins: 60,
+    scheduledAt: relInTz(-13, 15, 0, 'Asia/Kolkata'), timezone: 'Asia/Kolkata', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_arjun'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-008', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -252,14 +252,14 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-009', requisitionId: 'REQ-2049', candidateId: 'CAN-4103', stageKey: 's_l3',
-    scheduledAt: rel(1, 10, 30), timezone: 'Asia/Kolkata', durationMins: 45,
+    scheduledAt: relInTz(1, 10, 30, 'Asia/Kolkata'), timezone: 'Asia/Kolkata', durationMins: 45,
     mode: 'Video Conference', interviewerIds: ['u_ravi'], status: 'Scheduled',
     meetingLink: 'https://meet.nexora.com/int-009', recordingAvailable: false,
     transcript: [], feedbackStatus: 'not_started', chat: [],
   },
   {
     id: 'INT-010', requisitionId: 'REQ-2076', candidateId: 'CAN-4105', stageKey: 's2_l1',
-    scheduledAt: rel(-25, 10, 0), timezone: 'Europe/London', durationMins: 60,
+    scheduledAt: relInTz(-25, 10, 0, 'Europe/London'), timezone: 'Europe/London', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_hana'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-010', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -278,7 +278,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-011', requisitionId: 'REQ-2076', candidateId: 'CAN-4105', stageKey: 's2_l2',
-    scheduledAt: rel(-17, 14, 0), timezone: 'Europe/London', durationMins: 90,
+    scheduledAt: relInTz(-17, 14, 0, 'Europe/London'), timezone: 'Europe/London', durationMins: 90,
     mode: 'Video Conference', interviewerIds: ['u_sophie', 'u_soundar'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-011', recordingAvailable: true,
     transcript: T_ELIF_L2, feedbackStatus: 'submitted', chat: [],
@@ -296,7 +296,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-012', requisitionId: 'REQ-2076', candidateId: 'CAN-4105', stageKey: 's2_l3',
-    scheduledAt: rel(-8, 11, 0), timezone: 'Europe/London', durationMins: 45,
+    scheduledAt: relInTz(-8, 11, 0, 'Europe/London'), timezone: 'Europe/London', durationMins: 45,
     mode: 'Video Conference', interviewerIds: ['u_sophie'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-012', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -314,7 +314,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-013', requisitionId: 'REQ-2076', candidateId: 'CAN-4106', stageKey: 's2_l1',
-    scheduledAt: rel(-14, 9, 30), timezone: 'Europe/London', durationMins: 60,
+    scheduledAt: relInTz(-14, 9, 30, 'Europe/London'), timezone: 'Europe/London', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_hana'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-013', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -333,14 +333,14 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-014', requisitionId: 'REQ-2076', candidateId: 'CAN-4106', stageKey: 's2_l2',
-    scheduledAt: rel(0, 16, 0), timezone: 'Europe/London', durationMins: 90,
+    scheduledAt: relHours(6), timezone: 'Europe/London', durationMins: 90,
     mode: 'Video Conference', interviewerIds: ['u_sophie', 'u_soundar'], status: 'Scheduled',
     meetingLink: 'https://meet.nexora.com/int-014', recordingAvailable: false,
     transcript: [], feedbackStatus: 'not_started', chat: [],
   },
   {
     id: 'INT-015', requisitionId: 'REQ-2088', candidateId: 'CAN-4108', stageKey: 's3_l1',
-    scheduledAt: rel(-43, 14, 0), timezone: 'Asia/Singapore', durationMins: 60,
+    scheduledAt: relInTz(-43, 14, 0, 'Asia/Singapore'), timezone: 'Asia/Singapore', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_daniel'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-015', recordingAvailable: true,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -358,7 +358,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-016', requisitionId: 'REQ-2088', candidateId: 'CAN-4108', stageKey: 's3_l2',
-    scheduledAt: rel(-30, 10, 0), timezone: 'Asia/Singapore', durationMins: 90,
+    scheduledAt: relInTz(-30, 10, 0, 'Asia/Singapore'), timezone: 'Asia/Singapore', durationMins: 90,
     mode: 'In person at office', interviewerIds: ['u_daniel', 'u_elena'], status: 'Completed',
     meetingLink: 'Singapore office, Level 12 boardroom', recordingAvailable: false,
     transcript: [], feedbackStatus: 'submitted', chat: [],
@@ -375,7 +375,7 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-017', requisitionId: 'REQ-2088', candidateId: 'CAN-4108', stageKey: 's3_l3',
-    scheduledAt: rel(-17, 15, 0), timezone: 'Europe/Berlin', durationMins: 45,
+    scheduledAt: relInTz(-17, 15, 0, 'Europe/Berlin'), timezone: 'Europe/Berlin', durationMins: 45,
     mode: 'Video Conference', interviewerIds: ['u_elena'], status: 'Completed',
     meetingLink: 'https://meet.nexora.com/int-017', recordingAvailable: true,
     transcript: T_CARLOS_L3, feedbackStatus: 'submitted', chat: [],
@@ -393,12 +393,21 @@ export const INTERVIEWS: Interview[] = [
   },
   {
     id: 'INT-018', requisitionId: 'REQ-2088', candidateId: 'CAN-4108', stageKey: 's3_l4',
-    scheduledAt: rel(2, 13, 0), timezone: 'Asia/Singapore', durationMins: 60,
+    scheduledAt: relInTz(2, 13, 0, 'Asia/Singapore'), timezone: 'Asia/Singapore', durationMins: 60,
     mode: 'Video Conference', interviewerIds: ['u_nadia', 'u_elena', 'u_ravi'], status: 'Scheduled',
     meetingLink: 'https://meet.nexora.com/int-018', recordingAvailable: false,
     transcript: [], feedbackStatus: 'not_started', chat: [],
   },
 ]
+
+/** One recorded no-show — the interview completion rate has to mean something. */
+INTERVIEWS.push({
+  id: 'INT-019', requisitionId: 'REQ-2076', candidateId: 'CAN-4106', stageKey: 's2_ta',
+  scheduledAt: relInTz(-21, 15, 0, 'Europe/London'), timezone: 'Europe/London', durationMins: 30,
+  mode: 'Telephonic', interviewerIds: ['u_marcus'], status: 'No Show',
+  meetingLink: 'https://meet.nexora.com/int-019', recordingAvailable: false,
+  transcript: [], feedbackStatus: 'not_started', chat: [],
+})
 
 export const interviewById = (id: string) => INTERVIEWS.find(i => i.id === id)
 export const interviewsForCandidate = (candidateId: string) =>

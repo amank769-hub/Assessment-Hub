@@ -27,6 +27,41 @@ export const relHours = (hours: number): string => {
   return d.toISOString()
 }
 
+/** Offset of a timezone from UTC, in ms, at a given instant. DST-aware. */
+const tzOffsetMs = (date: Date, timeZone: string): number => {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone, hour12: false,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    }).formatToParts(date).map(p => [p.type, p.value]),
+  ) as Record<string, string>
+  const asUtc = Date.UTC(
+    +parts.year, +parts.month - 1, +parts.day,
+    +parts.hour % 24, +parts.minute, +parts.second,
+  )
+  return asUtc - date.getTime()
+}
+
+/**
+ * An instant expressed as a wall-clock time in a specific timezone — 15:00 in
+ * Bangalore is a different moment from 15:00 in London, and the schedule has
+ * to mean the former. Resolved twice so a DST boundary lands correctly.
+ */
+export const relInTz = (days: number, hh: number, mm: number, timeZone: string): string => {
+  const base = new Date(NOW)
+  base.setDate(base.getDate() + days)
+  const [y, m, d] = new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(base).split('-').map(Number)
+
+  let instant = Date.UTC(y, m - 1, d, hh, mm)
+  for (let i = 0; i < 2; i++) {
+    instant = Date.UTC(y, m - 1, d, hh, mm) - tzOffsetMs(new Date(instant), timeZone)
+  }
+  return new Date(instant).toISOString()
+}
+
 export const daysBetween = (a: string | Date, b: string | Date = NOW): number => {
   const d1 = typeof a === 'string' ? new Date(a) : a
   const d2 = typeof b === 'string' ? new Date(b) : b

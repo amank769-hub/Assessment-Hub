@@ -124,7 +124,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
             <NavLink key={n.to} to={n.to} onClick={() => setMobileNav(false)}
               className={({ isActive }) => cx(
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all',
-                isActive ? 'bg-white/12 text-white shadow-inset' : 'text-white/62 hover:text-white hover:bg-white/[0.07]')}>
+                isActive ? 'bg-white/12 text-white shadow-inset' : 'text-white/60 hover:text-white hover:bg-white/[0.07]')}>
               <n.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
               {n.label}
             </NavLink>
@@ -139,7 +139,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
                 <NavLink key={n.to} to={n.to} onClick={() => setMobileNav(false)}
                   className={({ isActive }) => cx(
                     'flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all',
-                    isActive ? 'bg-white/12 text-white' : 'text-white/62 hover:text-white hover:bg-white/[0.07]')}>
+                    isActive ? 'bg-white/12 text-white' : 'text-white/60 hover:text-white hover:bg-white/[0.07]')}>
                   <n.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
                   {n.label}
                 </NavLink>
@@ -149,7 +149,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
 
           {state.role !== 'candidate' && (
             <NavLink to="/portal" onClick={() => setMobileNav(false)}
-              className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-white/62 hover:text-white hover:bg-white/[0.07] transition-all">
+              className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-white/60 hover:text-white hover:bg-white/[0.07] transition-all">
               <MessageSquare className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
               Candidate Portal
               <span className="ml-auto text-[10px] font-semibold text-electric-300">Preview</span>
