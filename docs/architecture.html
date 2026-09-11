@@ -1,0 +1,1014 @@
+<title>Nexora AI Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@600;700&display=swap">
+
+<style>
+  :root {
+    color-scheme: light;
+    --paper:      #F3F5F9;
+    --surface:    #FFFFFF;
+    --plate:      #FBFCFE;
+    --ink:        #111A2E;
+    --ink-soft:   #4C566D;
+    --ink-faint:  #7B849A;
+    --rule:       #D7DEEA;
+    --rule-soft:  #E6EBF3;
+    --grid:       rgba(17, 26, 46, 0.045);
+
+    /* Carried from the product's own colour language, so the document
+       teaches the same code the app uses. */
+    --trace:      #2A78D6;   /* the flow under discussion */
+    --trace-wash: #E8F0FC;
+    --machine:    #4A3AA7;   /* AI-authored */
+    --machine-wash:#EFECFA;
+    --human:      #0B7D3B;   /* human-confirmed */
+    --human-wash: #E6F4EC;
+    --gate:       #B4530E;   /* a blocking decision point */
+    --gate-wash:  #FBF0E6;
+
+    --measure: 68ch;
+    --plate-w: 1180px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper:      #0B1120;
+      --surface:    #121A2C;
+      --plate:      #141D31;
+      --ink:        #E8ECF4;
+      --ink-soft:   #A3ADC2;
+      --ink-faint:  #6E7890;
+      --rule:       #2A3550;
+      --rule-soft:  #1E2740;
+      --grid:       rgba(232, 236, 244, 0.05);
+      --trace:      #6BA6F0;
+      --trace-wash: #16233C;
+      --machine:    #A08FEA;
+      --machine-wash:#1E1B38;
+      --human:      #4FBF7E;
+      --human-wash: #10281B;
+      --gate:       #E19A5B;
+      --gate-wash:  #2A1D10;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper:      #0B1120;
+    --surface:    #121A2C;
+    --plate:      #141D31;
+    --ink:        #E8ECF4;
+    --ink-soft:   #A3ADC2;
+    --ink-faint:  #6E7890;
+    --rule:       #2A3550;
+    --rule-soft:  #1E2740;
+    --grid:       rgba(232, 236, 244, 0.05);
+    --trace:      #6BA6F0;
+    --trace-wash: #16233C;
+    --machine:    #A08FEA;
+    --machine-wash:#1E1B38;
+    --human:      #4FBF7E;
+    --human-wash: #10281B;
+    --gate:       #E19A5B;
+    --gate-wash:  #2A1D10;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background-color: var(--paper);
+    /* The substrate is a faint ruled grid — the assessment sheet's own
+       material, abstracted. */
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { padding-inline: 20px; padding-block: 0; }
+  .col  { max-width: var(--measure); margin-inline: auto; }
+  .plate-col { max-width: var(--plate-w); margin-inline: auto; }
+
+  /* ── Masthead ─────────────────────────────────────────────────────── */
+
+  .masthead { border-bottom: 1px solid var(--rule); background: var(--surface); }
+  .masthead-inner {
+    max-width: var(--plate-w); margin-inline: auto;
+    padding-block: 46px 34px;
+    display: grid; gap: 28px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 900px) {
+    .masthead-inner { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); align-items: end; }
+  }
+
+  .stamp {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11.5px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-bottom: 18px;
+  }
+  .stamp .tick { width: 22px; height: 1px; background: var(--rule); display: inline-block; }
+
+  h1 {
+    font-family: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+    font-weight: 700; font-size: clamp(2.1rem, 5.2vw, 3.15rem);
+    line-height: 1.06; letter-spacing: -0.022em; text-wrap: balance;
+    margin: 0 0 16px;
+  }
+  .standfirst { font-size: 1.06rem; color: var(--ink-soft); max-width: 54ch; margin: 0; }
+
+  .spec {
+    border: 1px solid var(--rule); background: var(--plate);
+    padding: 16px 18px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12.5px; line-height: 1.85;
+  }
+  .spec dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 18px; }
+  .spec dt { color: var(--ink-faint); letter-spacing: 0.04em; text-transform: uppercase; font-size: 11px; align-self: center; }
+  .spec dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* ── Sections ─────────────────────────────────────────────────────── */
+
+  main { padding-block: 0 80px; }
+
+  section { padding-block: 52px 8px; }
+  section + section { border-top: 1px solid var(--rule-soft); }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--trace); margin: 0 0 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+  h2 {
+    font-family: 'IBM Plex Serif', Georgia, serif;
+    font-weight: 600; font-size: clamp(1.5rem, 3.1vw, 2rem);
+    line-height: 1.18; letter-spacing: -0.015em; text-wrap: balance;
+    margin: 0 0 14px;
+  }
+  h3 {
+    font-size: 1.02rem; font-weight: 600; margin: 32px 0 8px;
+    letter-spacing: -0.005em;
+  }
+  p { margin: 0 0 16px; }
+  p:last-child { margin-bottom: 0; }
+  .lede { font-size: 1.06rem; color: var(--ink-soft); }
+
+  strong { font-weight: 600; }
+  code, .mono {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.875em;
+  }
+  code {
+    background: var(--plate); border: 1px solid var(--rule-soft);
+    padding: 0.1em 0.38em; border-radius: 2px; white-space: nowrap;
+  }
+
+  a { color: var(--trace); text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--trace); outline-offset: 3px; }
+
+  /* ── Figure plates ────────────────────────────────────────────────── */
+
+  figure {
+    margin: 30px auto 8px; max-width: var(--plate-w);
+    background: var(--surface); border: 1px solid var(--rule);
+  }
+  .plate-scroll { overflow-x: auto; padding: 22px 22px 6px; }
+  figure svg { display: block; width: 100%; height: auto; min-width: 640px; }
+  figcaption {
+    border-top: 1px solid var(--rule-soft);
+    padding: 12px 22px 14px;
+    font-size: 13.5px; color: var(--ink-soft);
+    display: flex; gap: 14px; align-items: baseline;
+  }
+  figcaption .fignum {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+    color: var(--ink-faint); white-space: nowrap; text-transform: uppercase;
+  }
+
+  /* SVG type + structure, themed through tokens */
+  svg text { font-family: 'IBM Plex Mono', ui-monospace, monospace; fill: var(--ink); }
+  .t-lbl   { font-size: 13px; font-weight: 500; }
+  .t-sm    { font-size: 11px; fill: var(--ink-soft); }
+  .t-xs    { font-size: 10px; fill: var(--ink-faint); letter-spacing: 0.06em; }
+  .t-num   { font-size: 11px; font-weight: 600; fill: var(--ink-faint); letter-spacing: 0.08em; }
+  .box     { fill: var(--plate); stroke: var(--ink); stroke-width: 1.25; }
+  .box-t   { fill: var(--trace-wash); stroke: var(--trace); stroke-width: 1.25; }
+  .box-m   { fill: var(--machine-wash); stroke: var(--machine); stroke-width: 1.25; }
+  .box-h   { fill: var(--human-wash); stroke: var(--human); stroke-width: 1.25; }
+  .lane    { fill: none; stroke: var(--rule); stroke-width: 1; }
+  .flow    { fill: none; stroke: var(--ink); stroke-width: 1.25; }
+  .flow-t  { fill: none; stroke: var(--trace); stroke-width: 1.6; }
+  .flow-m  { fill: none; stroke: var(--machine); stroke-width: 1.4; }
+  .flow-h  { fill: none; stroke: var(--human); stroke-width: 1.4; }
+  .dash    { stroke-dasharray: 5 4; }
+
+  /* ── Small components ─────────────────────────────────────────────── */
+
+  .grid-2 { display: grid; gap: 18px; grid-template-columns: minmax(0,1fr); margin-top: 24px; }
+  @media (min-width: 760px) { .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .grid-3 { display: grid; gap: 18px; grid-template-columns: minmax(0,1fr); margin-top: 24px; }
+  @media (min-width: 700px) { .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+  .note {
+    border-left: 2px solid var(--trace); background: var(--surface);
+    padding: 14px 18px; font-size: 0.95rem;
+  }
+  .note.machine { border-left-color: var(--machine); }
+  .note.human   { border-left-color: var(--human); }
+  .note.gate    { border-left-color: var(--gate); }
+  .note h4 {
+    margin: 0 0 6px; font-size: 12px; font-weight: 600;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint);
+  }
+  .note p { margin: 0; color: var(--ink-soft); }
+
+  .keylist { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 0; }
+  .keylist li {
+    display: grid; gap: 4px 18px; padding: 14px 0;
+    border-top: 1px solid var(--rule-soft);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 700px) { .keylist li { grid-template-columns: 190px minmax(0, 1fr); } }
+  .keylist li:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .keylist dt, .keylist .k {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12px; font-weight: 500; color: var(--ink);
+    letter-spacing: 0.02em; padding-top: 2px;
+  }
+  .keylist .v { color: var(--ink-soft); font-size: 0.95rem; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; margin-top: 22px; }
+  th, td { text-align: left; padding: 11px 14px 11px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  th {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-faint); border-bottom-color: var(--rule);
+  }
+  td.m { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12.5px; white-space: nowrap; }
+  .tablewrap { overflow-x: auto; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 20px 0 0;
+    padding: 0; list-style: none;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+  .legend li { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 11px; height: 11px; border: 1.25px solid; flex: none; }
+  .sw-t { background: var(--trace-wash); border-color: var(--trace); }
+  .sw-m { background: var(--machine-wash); border-color: var(--machine); }
+  .sw-h { background: var(--human-wash); border-color: var(--human); }
+  .sw-g { background: var(--gate-wash); border-color: var(--gate); }
+
+  footer {
+    border-top: 1px solid var(--rule); background: var(--surface);
+    padding-block: 30px 40px;
+    font-size: 13px; color: var(--ink-faint);
+  }
+  footer .mono { font-size: 12px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-inner">
+      <div>
+        <p class="stamp">
+          <span>Architecture model</span><span class="tick"></span><span>Rev 1.0</span><span class="tick"></span><span>Flow view</span>
+        </p>
+        <h1>How Nexora AI actually works</h1>
+        <p class="standfirst">
+          A spreadsheet with five fixed tabs became a system that generates as many levels as a role
+          needs. This is where the data goes, what the machine writes, and the three places it has to
+          stop and wait for a person.
+        </p>
+      </div>
+      <div class="spec">
+        <dl>
+          <dt>Lineage</dt><dd>Interview Assessment Sheet v3.1</dd>
+          <dt>Surfaces</dt><dd>6 screens · 2 sub-screens</dd>
+          <dt>Roles</dt><dd>4, gated at the route</dd>
+          <dt>Modules</dt><dd>33 · ~11,850 lines</dd>
+          <dt>Mutations</dt><dd>26 reducer actions</dd>
+          <dt>Human gates</dt><dd>3, none bypassable</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ══ 1 · The four planes ══════════════════════════════════════════ -->
+<section>
+  <div class="wrap"><div class="col">
+    <p class="eyebrow">The shape of it</p>
+    <h2>Four planes, one direction of travel</h2>
+    <p class="lede">
+      Everything in the platform sits in one of four planes, and dependencies only ever point downward.
+      A screen can read the record; the record has never heard of a screen.
+    </p>
+    <p>
+      That constraint is what makes the interesting part possible. Because the engine knows nothing about
+      the surfaces, adding a fifth interview level is a data change, not a new screen.
+    </p>
+  </div></div>
+
+  <div class="wrap">
+    <figure>
+      <div class="plate-scroll">
+        <svg viewBox="0 0 1140 430" role="img" aria-label="Four horizontal planes — people, surfaces, engine and record — with dependencies pointing only downward from surfaces to engine to record.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- PLANE 1 · People -->
+          <text class="t-num" x="0" y="20">PLANE 01 — PEOPLE</text>
+          <rect class="box" x="0" y="30" width="252" height="50" rx="2"/>
+          <text class="t-lbl" x="16" y="52">TA Partner</text>
+          <text class="t-sm" x="16" y="69">owns the pipeline</text>
+
+          <rect class="box" x="268" y="30" width="252" height="50" rx="2"/>
+          <text class="t-lbl" x="284" y="52">Hiring Manager</text>
+          <text class="t-sm" x="284" y="69">owns the bar</text>
+
+          <rect class="box" x="536" y="30" width="252" height="50" rx="2"/>
+          <text class="t-lbl" x="552" y="52">Candidate</text>
+          <text class="t-sm" x="552" y="69">own application only</text>
+
+          <rect class="box" x="804" y="30" width="252" height="50" rx="2"/>
+          <text class="t-lbl" x="820" y="52">Leadership</text>
+          <text class="t-sm" x="820" y="69">aggregate, names masked</text>
+
+          <!-- PLANE 2 · Surfaces -->
+          <text class="t-num" x="0" y="126">PLANE 02 — SURFACES</text>
+          <rect class="box-t" x="0" y="136" width="1056" height="66" rx="2"/>
+          <text class="t-lbl" x="16" y="160">Dashboard · Requisitions · Candidates · Interviews · Assessments · Analysis · Portal</text>
+          <text class="t-sm" x="16" y="180">src/screens/ — read-only against the store, gated by ROLE_PERMISSIONS at the route</text>
+          <text class="t-xs" x="16" y="195">NO BUSINESS LOGIC LIVES HERE</text>
+
+          <!-- PLANE 3 · Engine -->
+          <text class="t-num" x="0" y="248">PLANE 03 — ENGINE</text>
+          <rect class="box" x="0" y="258" width="340" height="62" rx="2"/>
+          <text class="t-lbl" x="16" y="281">AppStore reducer</text>
+          <text class="t-sm" x="16" y="299">26 actions · every mutation</text>
+
+          <rect class="box" x="358" y="258" width="340" height="62" rx="2"/>
+          <text class="t-lbl" x="374" y="281">Derivation</text>
+          <text class="t-sm" x="374" y="299">rollups · health · insights</text>
+
+          <rect class="box" x="716" y="258" width="340" height="62" rx="2"/>
+          <text class="t-lbl" x="732" y="281">Generation</text>
+          <text class="t-sm" x="732" y="299">workflow → interviews → scorecards</text>
+
+          <!-- PLANE 4 · Record -->
+          <text class="t-num" x="0" y="366">PLANE 04 — RECORD</text>
+          <rect class="box" x="0" y="376" width="1056" height="46" rx="2"/>
+          <text class="t-lbl" x="16" y="398">Requisition · Competency · Candidate · Interview · Assessment · AuditEvent</text>
+          <text class="t-sm" x="640" y="398">src/data/types.ts — the single vocabulary</text>
+
+          <!-- Downward dependency arrows -->
+          <g color="var(--ink-faint)">
+            <line class="flow" x1="528" y1="80" x2="528" y2="130" marker-end="url(#ar)" stroke="currentColor"/>
+            <line class="flow" x1="528" y1="202" x2="528" y2="252" marker-end="url(#ar)" stroke="currentColor"/>
+            <line class="flow" x1="528" y1="320" x2="528" y2="370" marker-end="url(#ar)" stroke="currentColor"/>
+          </g>
+          <text class="t-xs" x="540" y="110">operates</text>
+          <text class="t-xs" x="540" y="232">dispatches</text>
+          <text class="t-xs" x="540" y="350">reads and writes</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">Fig 01</span>
+        <span>Dependencies point one way only. No module in the engine or record imports a screen, which is why a workflow change never becomes a UI change.</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ══ 2 · The spine ════════════════════════════════════════════════ -->
+<section>
+  <div class="wrap"><div class="col">
+    <p class="eyebrow">Flow 01 — the spine</p>
+    <h2>Application to offer, end to end</h2>
+    <p class="lede">
+      This is the path every candidate takes. Five of the six stages are automatic. The three amber bars
+      are the places the system deliberately refuses to continue on its own.
+    </p>
+  </div></div>
+
+  <div class="wrap">
+    <figure>
+      <div class="plate-scroll">
+        <svg viewBox="0 0 1180 300" role="img" aria-label="Left to right flow: requisition, application, AI screening, interview levels, scorecards, decision — with human decision gates before the interview stage and before the offer decision.">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- owning module labels -->
+          <text class="t-xs" x="20"   y="60">REQUISITIONS.TS</text>
+          <text class="t-xs" x="216"  y="60">PORTAL</text>
+          <text class="t-xs" x="412"  y="60">INSIGHTS / SCREENING</text>
+          <text class="t-xs" x="608"  y="60">INTERVIEWS.TS</text>
+          <text class="t-xs" x="804"  y="60">ASSESSMENTS.TS</text>
+          <text class="t-xs" x="1000" y="60">ANALYTICS.TS</text>
+
+          <!-- stage boxes -->
+          <rect class="box"   x="20"   y="72" width="150" height="76" rx="2"/>
+          <text class="t-lbl" x="34"   y="100">Requisition</text>
+          <text class="t-sm"  x="34"   y="118">JD in, framework</text>
+          <text class="t-sm"  x="34"   y="133">and workflow out</text>
+
+          <rect class="box"   x="216"  y="72" width="150" height="76" rx="2"/>
+          <text class="t-lbl" x="230"  y="100">Application</text>
+          <text class="t-sm"  x="230"  y="118">CV parsed, shown</text>
+          <text class="t-sm"  x="230"  y="133">back for correction</text>
+
+          <rect class="box-m" x="412"  y="72" width="150" height="76" rx="2"/>
+          <text class="t-lbl" x="426"  y="100">AI screening</text>
+          <text class="t-sm"  x="426"  y="118">match score with</text>
+          <text class="t-sm"  x="426"  y="133">cited evidence</text>
+
+          <rect class="box-t" x="608"  y="72" width="150" height="76" rx="2"/>
+          <text class="t-lbl" x="622"  y="100">Interview ×N</text>
+          <text class="t-sm"  x="622"  y="118">transcript, coverage,</text>
+          <text class="t-sm"  x="622"  y="133">talk ratio</text>
+
+          <rect class="box-t" x="804"  y="72" width="150" height="76" rx="2"/>
+          <text class="t-lbl" x="818"  y="100">Scorecard ×N</text>
+          <text class="t-sm"  x="818"  y="118">80% drafted,</text>
+          <text class="t-sm"  x="818"  y="133">0% counted</text>
+
+          <rect class="box"   x="1000" y="72" width="150" height="76" rx="2"/>
+          <text class="t-lbl" x="1014" y="100">Decision</text>
+          <text class="t-sm"  x="1014" y="118">consolidated score</text>
+          <text class="t-sm"  x="1014" y="133">+ evidence pack</text>
+
+          <!-- connectors -->
+          <g color="var(--ink-faint)">
+            <line class="flow" x1="170" y1="110" x2="210" y2="110" marker-end="url(#ar2)" stroke="currentColor"/>
+            <line class="flow" x1="366" y1="110" x2="406" y2="110" marker-end="url(#ar2)" stroke="currentColor"/>
+          </g>
+          <g color="var(--machine)">
+            <line class="flow-m" x1="758" y1="110" x2="798" y2="110" marker-end="url(#ar2)" stroke="currentColor"/>
+          </g>
+          <text class="t-xs" x="742" y="62" fill="var(--machine)">AI DRAFTS</text>
+
+          <!-- GATE 1 · recruiter decides -->
+          <g color="var(--gate)">
+            <line class="flow" x1="562" y1="110" x2="600" y2="110" marker-end="url(#ar2)" stroke="currentColor"/>
+            <rect x="576" y="88" width="7" height="44" fill="var(--gate)"/>
+          </g>
+          <rect class="box" x="470" y="180" width="230" height="76" rx="2" fill="var(--gate-wash)" stroke="var(--gate)"/>
+          <text class="t-lbl" x="484" y="205" fill="var(--gate)">Gate 1 · Recruiter</text>
+          <text class="t-sm"  x="484" y="224">Progress · Hold · Reject · Info</text>
+          <text class="t-sm"  x="484" y="240">AI suggests; it cannot progress</text>
+          <line class="flow dash" x1="580" y1="134" x2="580" y2="176" stroke="var(--gate)"/>
+
+          <!-- GATE 2 · sign-off, inside the scorecard -->
+          <rect x="866" y="150" width="7" height="26" fill="var(--gate)"/>
+          <rect class="box" x="740" y="180" width="230" height="76" rx="2" fill="var(--gate-wash)" stroke="var(--gate)"/>
+          <text class="t-lbl" x="754" y="205" fill="var(--gate)">Gate 2 · Interviewer</text>
+          <text class="t-sm"  x="754" y="224">Every row rated, fitment set,</text>
+          <text class="t-sm"  x="754" y="240">decision chosen — then sign</text>
+
+          <!-- GATE 3 · hiring manager -->
+          <g color="var(--gate)">
+            <line class="flow" x1="954" y1="110" x2="994" y2="110" marker-end="url(#ar2)" stroke="currentColor"/>
+            <rect x="970" y="88" width="7" height="44" fill="var(--gate)"/>
+          </g>
+          <rect class="box" x="1010" y="180" width="150" height="76" rx="2" fill="var(--gate-wash)" stroke="var(--gate)"/>
+          <text class="t-lbl" x="1024" y="205" fill="var(--gate)">Gate 3 · HM</text>
+          <text class="t-sm"  x="1024" y="224">ranks evidence,</text>
+          <text class="t-sm"  x="1024" y="240">never picks</text>
+          <line class="flow dash" x1="1074" y1="134" x2="1074" y2="176" stroke="var(--gate)"/>
+
+          <text class="t-num" x="20" y="278">NO PATH EXISTS THROUGH AN AMBER BAR WITHOUT A NAMED PERSON AND A TIMESTAMP</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">Fig 02</span>
+        <span>The two <span class="mono">×N</span> stages are the dynamic ones — how many depends entirely on what the requisition declared. Figure 03 shows why.</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="wrap"><div class="col">
+    <ul class="legend" aria-hidden="true">
+      <li><span class="swatch sw-t"></span>Generated per level</li>
+      <li><span class="swatch sw-m"></span>Machine-authored</li>
+      <li><span class="swatch sw-g"></span>Blocking human gate</li>
+    </ul>
+  </div></div>
+</section>
+
+<!-- ══ 3 · The generative core ══════════════════════════════════════ -->
+<section>
+  <div class="wrap"><div class="col">
+    <p class="eyebrow">Flow 02 — the generative core</p>
+    <h2>One declaration, N levels</h2>
+    <p class="lede">
+      This is the single architectural decision the whole product turns on. The requisition declares its
+      workflow as data. Interviews, scorecards and the consolidated rollup are all generated from that
+      declaration — nothing downstream is written by hand.
+    </p>
+    <p>
+      The assessment sheet we started from has five fixed tabs: TA Partner, Business 1, Business 2, HR
+      Partner, Segment Head. A sixth round meant a new tab and a new set of formulas. Here the same code
+      path produces four levels for the Bangalore sales role and five for the Singapore finance role,
+      because those requisitions declared different arrays.
+    </p>
+  </div></div>
+
+  <div class="wrap">
+    <figure>
+      <div class="plate-scroll">
+        <svg viewBox="0 0 1140 400" role="img" aria-label="A workflow array declared on each requisition fans out into one interview and one assessment per level, then a single consolidated rollup — four levels for REQ-2049 and five for REQ-2088 from the same code path.">
+          <defs>
+            <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- shared source -->
+          <rect class="box-t" x="330" y="0" width="480" height="54" rx="2"/>
+          <text class="t-lbl" x="348" y="24">WorkflowStage[] — declared on the requisition</text>
+          <text class="t-sm"  x="348" y="43">interviewStages(req) filters type === 'interview'</text>
+
+          <g color="var(--trace)">
+            <line class="flow-t" x1="480" y1="54" x2="270" y2="92" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow-t" x1="660" y1="54" x2="870" y2="92" marker-end="url(#ar3)" stroke="currentColor"/>
+          </g>
+
+          <!-- ── LEFT: REQ-2049, four levels ── -->
+          <text class="t-num" x="20" y="108">REQ-2049 · BANGALORE · BAND B8</text>
+          <rect class="lane" x="20" y="118" width="500" height="250" rx="2"/>
+
+          <text class="t-xs" x="36" y="142">INTERVIEWS</text>
+          <rect class="box-t" x="36"  y="150" width="106" height="38" rx="2"/><text class="t-sm" x="52"  y="174">L1 Business</text>
+          <rect class="box-t" x="154" y="150" width="106" height="38" rx="2"/><text class="t-sm" x="170" y="174">L2 Business</text>
+          <rect class="box-t" x="272" y="150" width="106" height="38" rx="2"/><text class="t-sm" x="288" y="174">L3 HR</text>
+          <rect class="box-t" x="390" y="150" width="106" height="38" rx="2"/><text class="t-sm" x="406" y="174">L4 Segment</text>
+
+          <text class="t-xs" x="36" y="216">SCORECARDS · GENERATED 1:1</text>
+          <rect class="box" x="36"  y="224" width="106" height="38" rx="2"/><text class="t-sm" x="52"  y="248">Assess L1</text>
+          <rect class="box" x="154" y="224" width="106" height="38" rx="2"/><text class="t-sm" x="170" y="248">Assess L2</text>
+          <rect class="box" x="272" y="224" width="106" height="38" rx="2"/><text class="t-sm" x="288" y="248">Assess L3</text>
+          <rect class="box" x="390" y="224" width="106" height="38" rx="2"/><text class="t-sm" x="406" y="248">Assess L4</text>
+
+          <g color="var(--ink-faint)">
+            <line class="flow" x1="89"  y1="188" x2="89"  y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="207" y1="188" x2="207" y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="325" y1="188" x2="325" y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="443" y1="188" x2="443" y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="266" y1="262" x2="266" y2="292" marker-end="url(#ar3)" stroke="currentColor"/>
+          </g>
+
+          <rect class="box-h" x="36" y="298" width="460" height="52" rx="2"/>
+          <text class="t-lbl" x="52" y="320">Consolidated rollup</text>
+          <text class="t-sm"  x="52" y="338">weighted across signed levels only</text>
+
+          <!-- ── RIGHT: REQ-2088, five levels ── -->
+          <text class="t-num" x="620" y="108">REQ-2088 · SINGAPORE · BAND B9</text>
+          <rect class="lane" x="620" y="118" width="500" height="250" rx="2"/>
+
+          <text class="t-xs" x="636" y="142">INTERVIEWS</text>
+          <rect class="box-t" x="636" y="150" width="84" height="38" rx="2"/><text class="t-sm" x="650" y="174">L1 Func</text>
+          <rect class="box-t" x="732" y="150" width="84" height="38" rx="2"/><text class="t-sm" x="746" y="174">L2 Case</text>
+          <rect class="box-t" x="828" y="150" width="84" height="38" rx="2"/><text class="t-sm" x="842" y="174">L3 Comp</text>
+          <rect class="box-t" x="924" y="150" width="84" height="38" rx="2"/><text class="t-sm" x="938" y="174">L4 Panel</text>
+          <rect class="box-t" x="1020" y="150" width="84" height="38" rx="2"/><text class="t-sm" x="1034" y="174">L5 Final</text>
+
+          <text class="t-xs" x="636" y="216">SCORECARDS · GENERATED 1:1</text>
+          <rect class="box" x="636" y="224" width="84" height="38" rx="2"/><text class="t-sm" x="652" y="248">Assess 1</text>
+          <rect class="box" x="732" y="224" width="84" height="38" rx="2"/><text class="t-sm" x="748" y="248">Assess 2</text>
+          <rect class="box" x="828" y="224" width="84" height="38" rx="2"/><text class="t-sm" x="844" y="248">Assess 3</text>
+          <rect class="box" x="924" y="224" width="84" height="38" rx="2"/><text class="t-sm" x="940" y="248">Assess 4</text>
+          <rect class="box" x="1020" y="224" width="84" height="38" rx="2"/><text class="t-sm" x="1036" y="248">Assess 5</text>
+
+          <g color="var(--ink-faint)">
+            <line class="flow" x1="678"  y1="188" x2="678"  y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="774"  y1="188" x2="774"  y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="870"  y1="188" x2="870"  y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="966"  y1="188" x2="966"  y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="1062" y1="188" x2="1062" y2="220" marker-end="url(#ar3)" stroke="currentColor"/>
+            <line class="flow" x1="870"  y1="262" x2="870"  y2="292" marker-end="url(#ar3)" stroke="currentColor"/>
+          </g>
+
+          <rect class="box-h" x="636" y="298" width="468" height="52" rx="2"/>
+          <text class="t-lbl" x="652" y="320">Consolidated rollup</text>
+          <text class="t-sm"  x="652" y="338">same function, five inputs instead of four</text>
+
+          <text class="t-num" x="20" y="392">ADDING A LEVEL IS AN ARRAY ENTRY — NO NEW SCREEN, NO NEW SCORECARD CODE</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">Fig 03</span>
+        <span>Both sides run the identical code path in <span class="mono">buildAssessments()</span>. The only difference is the length of the array each requisition declared.</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="wrap"><div class="col">
+    <div class="note">
+      <h4>What this buys the team</h4>
+      <p>
+        A hiring manager who wants a fifth round adds a stage from the workflow tab. The matching scorecard
+        appears for every candidate already in process, the comparison matrix grows a column, and the
+        rollup recomputes. Nobody opens an editor.
+      </p>
+    </div>
+  </div></div>
+</section>
+
+<!-- ══ 4 · Where AI stops ══════════════════════════════════════════ -->
+<section>
+  <div class="wrap"><div class="col">
+    <p class="eyebrow">Flow 03 — the handoff</p>
+    <h2>Where the machine stops</h2>
+    <p class="lede">
+      Read this one as two lanes. Work moves down the top lane until it reaches something only a person
+      can do, crosses to the bottom lane, and comes back. The crossings are the product.
+    </p>
+  </div></div>
+
+  <div class="wrap">
+    <figure>
+      <div class="plate-scroll">
+        <svg viewBox="0 0 1140 330" role="img" aria-label="Two swimlanes. The machine lane extracts frameworks, scores matches, drafts scorecards and assembles recommendations. The human lane approves, decides, confirms and signs. Work crosses between lanes at four points.">
+          <defs>
+            <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- lane grounds -->
+          <rect x="0" y="26" width="1140" height="106" fill="var(--machine-wash)" stroke="var(--machine)" stroke-width="1" rx="2"/>
+          <rect x="0" y="196" width="1140" height="106" fill="var(--human-wash)" stroke="var(--human)" stroke-width="1" rx="2"/>
+
+          <text class="t-num" x="14" y="19" fill="var(--machine)">MACHINE — DRAFTS, SCORES, EXPLAINS</text>
+          <text class="t-num" x="14" y="322" fill="var(--human)">HUMAN — APPROVES, DECIDES, SIGNS</text>
+
+          <!-- machine steps -->
+          <rect class="box-m" x="20"  y="46" width="222" height="66" rx="2"/>
+          <text class="t-lbl" x="34"  y="70">Extract framework</text>
+          <text class="t-sm"  x="34"  y="88">competencies, weights,</text>
+          <text class="t-sm"  x="34"  y="103">questions, rationale</text>
+
+          <rect class="box-m" x="300" y="46" width="222" height="66" rx="2"/>
+          <text class="t-lbl" x="314" y="70">Score the match</text>
+          <text class="t-sm"  x="314" y="88">every number cites a</text>
+          <text class="t-sm"  x="314" y="103">verbatim CV line</text>
+
+          <rect class="box-m" x="580" y="46" width="222" height="66" rx="2"/>
+          <text class="t-lbl" x="594" y="70">Draft the scorecard</text>
+          <text class="t-sm"  x="594" y="88">~80% of fields, each</text>
+          <text class="t-sm"  x="594" y="103">labelled and uncounted</text>
+
+          <rect class="box-m" x="860" y="46" width="260" height="66" rx="2"/>
+          <text class="t-lbl" x="874" y="70">Assemble the case</text>
+          <text class="t-sm"  x="874" y="88">rank evidence, cite the</text>
+          <text class="t-sm"  x="874" y="103">statements behind it</text>
+
+          <!-- human steps -->
+          <rect class="box-h" x="20"  y="216" width="222" height="66" rx="2"/>
+          <text class="t-lbl" x="34"  y="240">Approve framework</text>
+          <text class="t-sm"  x="34"  y="258">edit any row; weights</text>
+          <text class="t-sm"  x="34"  y="273">must total 100%</text>
+
+          <rect class="box-h" x="300" y="216" width="222" height="66" rx="2"/>
+          <text class="t-lbl" x="314" y="240">Screening decision</text>
+          <text class="t-sm"  x="314" y="258">progress, hold, reject,</text>
+          <text class="t-sm"  x="314" y="273">request information</text>
+
+          <rect class="box-h" x="580" y="216" width="222" height="66" rx="2"/>
+          <text class="t-lbl" x="594" y="240">Confirm and sign</text>
+          <text class="t-sm"  x="594" y="258">only confirmed rows</text>
+          <text class="t-sm"  x="594" y="273">reach the average</text>
+
+          <rect class="box-h" x="860" y="216" width="260" height="66" rx="2"/>
+          <text class="t-lbl" x="874" y="240">Hire, or do not</text>
+          <text class="t-sm"  x="874" y="258">the one decision the</text>
+          <text class="t-sm"  x="874" y="273">platform never makes</text>
+
+          <!-- crossings -->
+          <g color="var(--machine)">
+            <line class="flow-m" x1="131" y1="112" x2="131" y2="212" marker-end="url(#ar4)" stroke="currentColor"/>
+            <line class="flow-m" x1="411" y1="112" x2="411" y2="212" marker-end="url(#ar4)" stroke="currentColor"/>
+            <line class="flow-m" x1="691" y1="112" x2="691" y2="212" marker-end="url(#ar4)" stroke="currentColor"/>
+            <line class="flow-m" x1="990" y1="112" x2="990" y2="212" marker-end="url(#ar4)" stroke="currentColor"/>
+          </g>
+          <text class="t-xs" x="140" y="150">hands over</text>
+          <text class="t-xs" x="140" y="165">for approval</text>
+          <text class="t-xs" x="420" y="150">suggests only</text>
+          <text class="t-xs" x="420" y="165">never applies</text>
+          <text class="t-xs" x="700" y="150">drafts, waits</text>
+          <text class="t-xs" x="700" y="165">for signature</text>
+          <text class="t-xs" x="999" y="150">recommends</text>
+          <text class="t-xs" x="999" y="165">with citations</text>
+
+          <!-- feedback edge, human back to machine -->
+          <g color="var(--human)">
+            <path class="flow-h dash" d="M 242 249 L 268 249 L 268 79 L 296 79" marker-end="url(#ar4)" stroke="currentColor" fill="none"/>
+            <path class="flow-h dash" d="M 522 249 L 548 249 L 548 79 L 576 79" marker-end="url(#ar4)" stroke="currentColor" fill="none"/>
+            <path class="flow-h dash" d="M 802 249 L 828 249 L 828 79 L 856 79" marker-end="url(#ar4)" stroke="currentColor" fill="none"/>
+          </g>
+          <text class="t-xs" x="252" y="192" fill="var(--human)">OVERRIDES KEPT</text>
+          <text class="t-xs" x="532" y="192" fill="var(--human)">OVERRIDES KEPT</text>
+          <text class="t-xs" x="812" y="192" fill="var(--human)">OVERRIDES KEPT</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">Fig 04</span>
+        <span>Each dashed return edge writes both values to the audit trail — what the model suggested and what the person recorded. That pairing is the only reliable way to notice a model drifting.</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="wrap"><div class="col">
+    <h3>The guard, in the code</h3>
+    <p>
+      Gate 2 is not a convention anyone can forget. <code>SIGN_OFF</code> refuses and explains itself
+      unless all three conditions hold:
+    </p>
+    <ul class="keylist">
+      <li><span class="k">unrated === 0</span><span class="v">Every competency row carries a rating on the six-point scale. No decimals, as the sheet specifies.</span></li>
+      <li><span class="k">culturalFitment != null</span><span class="v">A value from the three-point fitment scale has been chosen.</span></li>
+      <li><span class="k">finalDecision != null</span><span class="v">One of the three IAS outcomes is recorded: suitable, on hold, or not suitable.</span></li>
+    </ul>
+    <div class="grid-2">
+      <div class="note machine">
+        <h4>What the machine contributes</h4>
+        <p>A suggested rating, the evidence it came from, and a confidence figure. Visible, labelled, and worth nothing until someone agrees with it.</p>
+      </div>
+      <div class="note human">
+        <h4>What counts</h4>
+        <p>Only rows a person has confirmed enter <code>weightedAverage</code>. An untouched AI draft scores zero, not 4.7.</p>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ══ 5 · Evidence chain ══════════════════════════════════════════ -->
+<section>
+  <div class="wrap"><div class="col">
+    <p class="eyebrow">Flow 04 — traceability</p>
+    <h2>From a sentence to a hiring recommendation</h2>
+    <p class="lede">
+      Every number in the analysis screens can be walked backwards to something a candidate actually said.
+      This is one real chain from the sample data, start to finish.
+    </p>
+  </div></div>
+
+  <div class="wrap">
+    <figure>
+      <div class="plate-scroll">
+        <svg viewBox="0 0 1140 420" role="img" aria-label="Seven steps: a transcript line at 53 seconds is tagged to a competency, the model suggests six out of six with cited evidence, the interviewer confirms it, the weighted average computes to 5.20, the rollup consolidates to 5.18 across three levels, and the recommendation cites the original line.">
+          <defs>
+            <marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- 1 · the utterance -->
+          <text class="t-num" x="20" y="18">01 — SPOKEN · INT-001 · T+00:53</text>
+          <rect class="box" x="20" y="28" width="700" height="62" rx="2"/>
+          <text class="t-sm" x="36" y="52">“First thing I did was stop everyone guessing. I froze changes, put one</text>
+          <text class="t-sm" x="36" y="70">engineer on data collection only, and got the customer on a 30-minute cadence.”</text>
+          <text class="t-xs" x="36" y="84">ANANYA SHARMA · CANDIDATE</text>
+
+          <g color="var(--ink-faint)"><line class="flow" x1="370" y1="90" x2="370" y2="116" marker-end="url(#ar5)" stroke="currentColor"/></g>
+
+          <!-- 2 · tagged -->
+          <text class="t-num" x="20" y="134">02 — TAGGED LIVE</text>
+          <rect class="box-m" x="20" y="144" width="340" height="46" rx="2"/>
+          <text class="t-sm" x="36" y="164">competencyId = c1_esc</text>
+          <text class="t-sm" x="36" y="181">Technical Escalation Management · weight 0.10</text>
+
+          <!-- 3 · suggested -->
+          <text class="t-num" x="400" y="134">03 — SUGGESTED</text>
+          <rect class="box-m" x="400" y="144" width="320" height="46" rx="2"/>
+          <text class="t-sm" x="416" y="164">rating 6 / 6 · confidence 0.94</text>
+          <text class="t-sm" x="416" y="181">carries the quote as its evidence</text>
+
+          <!-- 4 · confirmed -->
+          <text class="t-num" x="760" y="134">04 — CONFIRMED</text>
+          <rect class="box-h" x="760" y="144" width="360" height="46" rx="2"/>
+          <text class="t-sm" x="776" y="164">Murugan Iyer accepts 6 · signs the level</text>
+          <text class="t-sm" x="776" y="181">interviewerConfirmed = true</text>
+
+          <g color="var(--ink-faint)">
+            <line class="flow" x1="360" y1="167" x2="394" y2="167" marker-end="url(#ar5)" stroke="currentColor"/>
+            <line class="flow" x1="720" y1="167" x2="754" y2="167" marker-end="url(#ar5)" stroke="currentColor"/>
+            <line class="flow" x1="570" y1="190" x2="570" y2="222" marker-end="url(#ar5)" stroke="currentColor"/>
+          </g>
+
+          <!-- 5 · weighted average -->
+          <text class="t-num" x="20" y="240">05 — SCORECARD AVERAGE · ASM-4101-S_L1</text>
+          <rect class="box" x="20" y="250" width="540" height="62" rx="2"/>
+          <text class="t-lbl" x="36" y="276">Σ(rating × weight) ÷ Σ(weight) = 5.20 / 6</text>
+          <text class="t-sm"  x="36" y="296">over rated rows only — an unrated row is absent, not zero</text>
+
+          <!-- 6 · consolidation -->
+          <text class="t-num" x="600" y="240">06 — CONSOLIDATED · 3 SIGNED LEVELS</text>
+          <rect class="box" x="600" y="250" width="520" height="62" rx="2"/>
+          <text class="t-lbl" x="616" y="276">5.18 / 6 across L1, L2, L3</text>
+          <text class="t-sm"  x="616" y="296">unsigned levels contribute nothing and say so</text>
+
+          <g color="var(--ink-faint)">
+            <line class="flow" x1="560" y1="281" x2="594" y2="281" marker-end="url(#ar5)" stroke="currentColor"/>
+            <line class="flow" x1="570" y1="312" x2="570" y2="344" marker-end="url(#ar5)" stroke="currentColor"/>
+          </g>
+
+          <!-- 7 · recommendation -->
+          <text class="t-num" x="20" y="362">07 — RECOMMENDATION · SHOWN WITH ITS CITATIONS</text>
+          <rect class="box-t" x="20" y="372" width="1100" height="40" rx="2"/>
+          <text class="t-sm" x="36" y="397">“Strongest on Technical Escalation Management (6.0) — froze changes and installed a single named owner within the first hour.” Rated 6/6 by Murugan Iyer.</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">Fig 05</span>
+        <span>Seven hops, no black box. A hiring manager challenging the recommendation at step 07 can be shown the sentence at step 01 in two clicks.</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ══ 6 · Data model ══════════════════════════════════════════════ -->
+<section>
+  <div class="wrap"><div class="col">
+    <p class="eyebrow">Reference</p>
+    <h2>The record</h2>
+    <p class="lede">
+      Six entities carry the whole product. The cardinalities are where the dynamism lives — every
+      <span class="mono">1:N</span> on this diagram is a place the requisition gets to decide N.
+    </p>
+  </div></div>
+
+  <div class="wrap">
+    <figure>
+      <div class="plate-scroll">
+        <svg viewBox="0 0 1140 330" role="img" aria-label="Entity relationships. A requisition has many workflow stages and competencies and many candidates. A candidate has many interviews and assessments. An assessment has one competency score per competency and is generated per workflow stage. Every mutation writes an audit event.">
+          <defs>
+            <marker id="ar6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <rect class="box-t" x="20" y="120" width="188" height="70" rx="2"/>
+          <text class="t-lbl" x="36" y="146">Requisition</text>
+          <text class="t-sm"  x="36" y="165">workflow, framework,</text>
+          <text class="t-sm"  x="36" y="180">team, dates</text>
+
+          <rect class="box" x="266" y="20" width="188" height="58" rx="2"/>
+          <text class="t-lbl" x="282" y="45">WorkflowStage</text>
+          <text class="t-sm"  x="282" y="63">objective, panel, SLA</text>
+
+          <rect class="box" x="266" y="232" width="188" height="58" rx="2"/>
+          <text class="t-lbl" x="282" y="257">Competency</text>
+          <text class="t-sm"  x="282" y="275">weight, proficiency</text>
+
+          <rect class="box" x="266" y="120" width="188" height="70" rx="2"/>
+          <text class="t-lbl" x="282" y="146">Candidate</text>
+          <text class="t-sm"  x="282" y="165">profile, screening,</text>
+          <text class="t-sm"  x="282" y="180">consent, progress</text>
+
+          <rect class="box-t" x="512" y="62" width="188" height="58" rx="2"/>
+          <text class="t-lbl" x="528" y="87">Interview</text>
+          <text class="t-sm"  x="528" y="105">transcript, summary</text>
+
+          <rect class="box-t" x="512" y="180" width="188" height="58" rx="2"/>
+          <text class="t-lbl" x="528" y="205">Assessment</text>
+          <text class="t-sm"  x="528" y="223">the IAS scorecard</text>
+
+          <rect class="box" x="758" y="180" width="188" height="58" rx="2"/>
+          <text class="t-lbl" x="774" y="205">CompetencyScore</text>
+          <text class="t-sm"  x="774" y="223">rating vs aiSuggested</text>
+
+          <rect class="box-h" x="758" y="62" width="188" height="58" rx="2"/>
+          <text class="t-lbl" x="774" y="87">AuditEvent</text>
+          <text class="t-sm"  x="774" y="105">actor, action, detail</text>
+
+          <g color="var(--ink-faint)" stroke="currentColor">
+            <path class="flow" d="M 114 120 L 114 49 L 260 49" marker-end="url(#ar6)" fill="none"/>
+            <path class="flow" d="M 114 190 L 114 261 L 260 261" marker-end="url(#ar6)" fill="none"/>
+            <line class="flow" x1="208" y1="155" x2="260" y2="155" marker-end="url(#ar6)"/>
+            <path class="flow" d="M 454 140 L 483 140 L 483 91 L 506 91" marker-end="url(#ar6)" fill="none"/>
+            <path class="flow" d="M 454 170 L 483 170 L 483 209 L 506 209" marker-end="url(#ar6)" fill="none"/>
+            <line class="flow" x1="700" y1="209" x2="752" y2="209" marker-end="url(#ar6)"/>
+            <path class="flow dash" d="M 700 91 L 752 91" marker-end="url(#ar6)" fill="none"/>
+          </g>
+          <g color="var(--trace)" stroke="currentColor">
+            <path class="flow-t dash" d="M 360 78 L 360 104 L 470 104 L 470 200 L 506 200" marker-end="url(#ar6)" fill="none"/>
+          </g>
+
+          <text class="t-xs" x="124" y="42">1:N</text>
+          <text class="t-xs" x="124" y="278">1:N</text>
+          <text class="t-xs" x="218" y="148">1:N</text>
+          <text class="t-xs" x="460" y="132">1:N</text>
+          <text class="t-xs" x="460" y="188">1:N</text>
+          <text class="t-xs" x="706" y="202">1:N</text>
+          <text class="t-xs" x="706" y="84">EVERY MUTATION</text>
+          <text class="t-xs" x="376" y="112" fill="var(--trace)">GENERATES ONE PER STAGE</text>
+
+          <text class="t-num" x="20" y="318">SOLID = OWNS · DASHED = GENERATES OR RECORDS</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">Fig 06</span>
+        <span>The dashed blue edge is figure 03 restated as a relationship: a workflow stage is what causes an assessment to exist.</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="wrap"><div class="col">
+    <h3>How state actually moves</h3>
+    <p>
+      One reducer holds everything. A screen dispatches, the reducer returns new entities plus an audit
+      entry, and derived selectors recompute from there. There is no second source of truth to fall out
+      of sync.
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Action</th><th>What it changes</th><th>Writes audit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="m">SCREEN_DECISION</td><td>Candidate status and stage; closes the screening task</td><td>Yes, with the AI suggestion alongside</td></tr>
+          <tr><td class="m">ACCEPT_AI</td><td>Copies the draft into the row and marks it confirmed</td><td>Yes</td></tr>
+          <tr><td class="m">SCORE_ROW</td><td>One rating or note; recomputes the weighted average</td><td>No — captured at sign-off</td></tr>
+          <tr><td class="m">SIGN_OFF</td><td>Locks the scorecard, advances the stage, records the score</td><td>Yes, with the count of overrides</td></tr>
+          <tr><td class="m">ADD_STAGE</td><td>Appends a level; downstream generation follows</td><td>Yes</td></tr>
+          <tr><td class="m">APPROVE_FRAMEWORK</td><td>Publishes to the repository if weights total 100%</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div></div>
+</section>
+
+<!-- ══ 7 · Seams ═══════════════════════════════════════════════════ -->
+<section>
+  <div class="wrap"><div class="col">
+    <p class="eyebrow">Reference</p>
+    <h2>Where this plugs into what you already run</h2>
+    <p class="lede">
+      Nexora is the interview and decision layer, not a system of record. The planes in figure 01 are
+      drawn the way they are so an existing ATS can own the record without any of this changing.
+    </p>
+    <div class="grid-3">
+      <div class="note">
+        <h4>Live today</h4>
+        <p>Invites and reminders by email. Branded PDF export of comparisons and scorecards. Multi-country scheduling in each interview's own timezone.</p>
+      </div>
+      <div class="note">
+        <h4>Designed for, not wired</h4>
+        <p>Calendar sync for panel availability. Native video platform meetings and recording ingestion. ATS requisition and candidate sync.</p>
+      </div>
+      <div class="note gate">
+        <h4>Deliberately absent</h4>
+        <p>Auto-rejection. Ranking that picks rather than orders. Any path from a model output to a candidate-facing outcome without a signature.</p>
+      </div>
+    </div>
+
+    <h3>The three questions this model should let anyone answer</h3>
+    <ul class="keylist">
+      <li><span class="k">Fig 03</span><span class="v">“What happens if this role needs six rounds instead of four?” One array entry. Everything downstream follows.</span></li>
+      <li><span class="k">Fig 04</span><span class="v">“Is the AI making hiring decisions?” No, and there is no code path by which it could. Three gates, all blocking.</span></li>
+      <li><span class="k">Fig 05</span><span class="v">“Where did this score come from?” Seven hops back to a sentence someone said, with the interviewer's name on it.</span></li>
+    </ul>
+  </div></div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap"><div class="plate-col">
+    <p class="mono">NEXORA AI · ARCHITECTURE MODEL · REV 1.0 · FLOW VIEW</p>
+    <p>
+      Drawn from the implementation, not from intent — every figure here reflects code that runs.
+      Assessment structure derives from the Interview Assessment Sheet v3.1.
+    </p>
+  </div></div>
+</footer>

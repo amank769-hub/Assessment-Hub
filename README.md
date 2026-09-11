@@ -89,6 +89,12 @@ Two things are deliberately left needing a human: Kavya Nair's Level 2 scorecard
 on Arjun Mehta's signature, and James Okonkwo's Level 1 feedback is four days past SLA with his Level 2
 running today.
 
+## Architecture
+
+`docs/architecture.html` is a flow-first model of the system, drawn for showing to a team — the four
+planes, the spine from application to offer, how one workflow declaration generates N interview levels,
+and the three human gates. Open it the same way as the app: double-click it.
+
 ## Stack
 
 React 18, TypeScript, Vite, Tailwind, Recharts, React Router. `src/data/` holds the domain model and
