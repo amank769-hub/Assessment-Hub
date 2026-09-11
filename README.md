@@ -91,9 +91,14 @@ running today.
 
 ## Architecture
 
-`docs/architecture.html` is a flow-first model of the system, drawn for showing to a team — the four
-planes, the spine from application to offer, how one workflow declaration generates N interview levels,
-and the three human gates. Open it the same way as the app: double-click it.
+A flow-first model of the system, drawn for showing to a team — the four planes, the spine from
+application to offer, how one workflow declaration generates N interview levels, and the three human
+gates.
+
+- **`docs/Nexora-AI-Architecture.pdf`** — 11 pages, A4 landscape. The version to email or print.
+- **`docs/architecture.html`** — the same document on screen. Fonts are embedded, so it holds its
+  typography opened from disk with no network. Regenerate the PDF from it by printing to PDF, or with
+  the Playwright snippet noted in the file header.
 
 ## Stack
 
